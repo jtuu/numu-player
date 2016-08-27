@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>foo</title>
+  <style>
+    audio{
+      display: block;
+    }
+  </style>
+</head>
+<body>
+<input id="input" type="file">
+<button id="start">upload</button>
+<audio autoplay controls id="player"></audio>
+<h3>playlist</h3>
+<ul id="playlist"></ul>
+
+<script src="api/ws/socket.io.js"></script>
+<script>
+var playlist = [];
+const room = "myroom";
+const socket = io("/public", {
+  path: "/api/ws/"
+});
+socket.emit("join", room);
+socket.on("newSong", updatePlaylist);
+socket.on("play", fileName => {
+  curPlstIndex = playlist.findIndex(v => v.fileName === fileName);
+  playerEl.src = `transcoded/${fileName}.mp3`;
+});
+
+var curPlstIndex = -1;
+const url = `/api/${room}/song`;
+const inputEl = document.getElementById("input");
+const startButton = document.getElementById("start");
+const playlistEl = document.getElementById("playlist");
+const playerEl = document.getElementById("player");
+const reader = new FileReader();
+var file = null;
+
+inputEl.addEventListener("change", e => {
+	file = e.target.files[0];
+})
+startButton.addEventListener("click", initUpload);
+
+function initUpload(){
+	if(!file){
+		return;
+	}
+  let formData = new FormData();
+  formData.append("song", file);
+  fetch(url, {
+    method: "post",
+    body: formData
+  }).then(console.log.bind(console, "Request succesful"))
+  .catch(console.error.bind(console, "Request failed"));
+}
+
+updatePlaylist();
+
+function updatePlaylist(){
+  fetch(`/api/${room}/playlist`).then(files => files.json()).then(files => {
+    playlist = files;
+    updatePlaylistView();
+  })
+  .catch(console.error.bind(console));
+}
+
+function updatePlaylistView(){
+  while(playlistEl.firstChild){
+    playlistEl.removeChild(playlistEl.firstChild);
+  }
+  for(let i = 0; i < playlist.length; i++){
+    let el = document.createElement("li");
+    el.innerHTML = playlist[i].orig_filename;
+    el.addEventListener("click", e => {
+      startPlaying(playlist[i].filename);
+      curPlstIndex = i;
+    });
+    playlistEl.appendChild(el);
+  }
+}
+
+function startPlaying(fileName){
+  socket.emit("play", fileName);
+  playerEl.src = `transcoded/${fileName}.mp3`;
+}
+
+playerEl.addEventListener("ended", e => {
+  startPlaying(playlist[++curPlstIndex].filename);
+})
+
+</script>
+
+</body>
+</html>
