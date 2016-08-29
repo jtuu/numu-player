@@ -51,12 +51,16 @@ module.exports = function setup(app) {
 		socket.on("join", room => {
 			socket.nickname = randomNick();
 			changeRoom(socket, room);
-			publicNS.to(room).emit("chatJoin", socket.nickname);
+			socket.broadcast.to(room).emit("chatJoin", socket.nickname);
+			socket.emit("nickChange", {
+				old: "me",
+				new: socket.nickname
+			});
 			logSock(socket, "joined", room);
 		});
 
 		socket.on("nickChange", nick => {
-			publicNS.to(socket.currentRoom).emit("nickChange", {
+			socket.broadcast.to(socket.currentRoom).emit("nickChange", {
 				old: socket.nickname,
 				new: nick
 			});
@@ -74,13 +78,13 @@ module.exports = function setup(app) {
 		["play", "pause", "chatMessage", "seek"].forEach(eventName => {
 			socket.on(eventName, value => {
 				logSock(socket, eventName, value);
-				publicNS.to(socket.currentRoom).emit(eventName, value);
+				socket.broadcast.to(socket.currentRoom).emit(eventName, value);
 			});
 		});
 
 		socket.on("disconnect", () => {
 			logSock(socket, "disconnected");
-			publicNS.to(socket.currentRoom).emit("chatQuit", socket.nickname);
+			socket.broadcast.to(socket.currentRoom).emit("chatQuit", socket.nickname);
 		});
 
 	});

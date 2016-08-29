@@ -1,100 +1,227 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="utf-8">
-  <title>foo</title>
-  <style>
-    audio{
-      display: block;
-    }
-  </style>
-</head>
-<body>
-<input id="input" type="file">
-<button id="start">upload</button>
-<audio autoplay controls id="player"></audio>
-<h3>playlist</h3>
-<ul id="playlist"></ul>
+  <head>
+    <meta charset="utf-8" />
+    <title>React Tutorial</title>
+    <script src="https://npmcdn.com/react@15.3.1/dist/react.js"></script>
+    <script src="https://npmcdn.com/react-dom@15.3.1/dist/react-dom.js"></script>
+    <script src="https://npmcdn.com/babel-core@5.8.38/browser.min.js"></script>
+    <script src="https://npmcdn.com/jquery@3.1.0/dist/jquery.min.js"></script>
+    <script src="https://npmcdn.com/remarkable@1.6.2/dist/remarkable.min.js"></script>
+    <script src="api/ws/socket.io.js"></script>
+    <style>
+      .message > *{
+        margin-right: 5px;
+      }
 
-<script src="api/ws/socket.io.js"></script>
-<script>
-var playlist = [];
-const room = "myroom";
-const socket = io("/public", {
-  path: "/api/ws/"
-});
-socket.emit("join", room);
-socket.on("newSong", updatePlaylist);
-socket.on("play", fileName => {
-  curPlstIndex = playlist.findIndex(v => v.fileName === fileName);
-  playerEl.src = `transcoded/${fileName}.mp3`;
-});
-socket.on("songPosRequest", (data, cb) => {
-  cb(100);
-});
+      .message > .timestamp:before{
+        content:"[";
+      }
+      .message > .timestamp:after{
+        content:"]";
+      }
+      .message.chatMessage > .nick:before{
+        content:"<";
+      }
+      .message.chatMessage > .nick:after{
+        content:">";
+      }
+    </style>
+  </head>
+  <body>
+    <div id="content"></div>
+    <script>
+      var socket = io("/public", {
+        path: "/api/ws/"
+      });
+      socket.emit("join", "myroom");
+    </script>
+    <script type="text/babel">
+      var PlaylistBox = React.createClass({
+        getInitialState: function(){
+          return {data: []};
+        },
+        componentDidMount: function(){
+          $.ajax({
+            url: this.props.url,
+            dataType: "json",
+            cache: false,
+            success: data => {
+              this.setState({data: data})
+            },
+            error: (xhr, status, err) => {
+              console.error(this.props.url, status, err.toString())
+            }
+          })
+        },
+        render: function(){
+          return (<Playlist data={this.state.data} />)
+        }
+      });
+      var Playlist = React.createClass({
+        render: function(){
+          var list = this.props.data.map(song => {
+            return (
+              <li key={song.filename}>{song.orig_filename}</li>
+            )
+          });
+          return (
+            <ul>
+              {list}
+            </ul>
+          )
+        }
+      });
 
-var curPlstIndex = -1;
-const url = `/api/${room}/song`;
-const inputEl = document.getElementById("input");
-const startButton = document.getElementById("start");
-const playlistEl = document.getElementById("playlist");
-const playerEl = document.getElementById("player");
-const reader = new FileReader();
-var file = null;
+      var chatMessageId = 0;
+      var newLineRegex = /(?:\r?\n|\r)+/gm;
+      var ChatBox = React.createClass({
+        addMessage: function(msg){
+          msg.id = chatMessageId++;
+          var newData = this.state.data.concat([msg]);
+          this.setState({data: newData});
+        },
+        getInitialState: function(){
+          return {data: [], names: [], ownNick: "me"};
+        },
+        componentDidMount: function(){
+          socket.on("chatMessage", msg => {
+            msg.type = "chatMessage";
+            this.addMessage(msg);
+          });
+          socket.on("chatJoin", nick => {
+            let msg = {nick};
+            msg.type = "join";
+            msg.text = "joined";
+            this.addMessage(msg);
+            this.setState({names: this.state.names.concat([nick])});
+          });
+          socket.on("chatQuit", nick => {
+            let msg = {nick};
+            msg.type = "quit";
+            msg.text = "left";
+            this.addMessage(msg);
 
-inputEl.addEventListener("change", e => {
-	file = e.target.files[0];
-})
-startButton.addEventListener("click", initUpload);
+            var index = this.state.names.indexOf(nick);
+            if(index > -1){
+              this.state.splice(index, 1);
+            }
 
-function initUpload(){
-	if(!file){
-		return;
-	}
-  let formData = new FormData();
-  formData.append("song", file);
-  fetch(url, {
-    method: "post",
-    body: formData
-  }).then(console.log.bind(console, "Request succesful"))
-  .catch(console.error.bind(console, "Request failed"));
-}
+            this.setState({names: this.state.names});
+          });
+          socket.on("nickChange", nicks =>{
+            let msg = {nick: nicks.old};
+            msg.type = "nickChange";
+            msg.text = "is now known as " + nicks.new;
+            this.addMessage(msg);
 
-updatePlaylist();
+            var index = this.state.names.indexOf(nicks.old);
+            if(index){
+              this.state.names[index] = nicks.new;
+              this.setState({names: this.state.names});
+            }
 
-function updatePlaylist(){
-  fetch(`/api/${room}/playlist`).then(files => files.json()).then(files => {
-    playlist = files;
-    updatePlaylistView();
-  })
-  .catch(console.error.bind(console));
-}
-
-function updatePlaylistView(){
-  while(playlistEl.firstChild){
-    playlistEl.removeChild(playlistEl.firstChild);
-  }
-  for(let i = 0; i < playlist.length; i++){
-    let el = document.createElement("li");
-    el.innerHTML = playlist[i].orig_filename;
-    el.addEventListener("click", e => {
-      startPlaying(playlist[i].filename);
-      curPlstIndex = i;
-    });
-    playlistEl.appendChild(el);
-  }
-}
-
-function startPlaying(fileName){
-  socket.emit("play", fileName);
-  playerEl.src = `transcoded/${fileName}.mp3`;
-}
-
-playerEl.addEventListener("ended", e => {
-  startPlaying(playlist[++curPlstIndex].filename);
-})
-
-</script>
-
-</body>
+            if(nicks.old === "me"){
+              this.setState({ownNick: nicks.new});
+            }
+          });
+        },
+        handleChatMessageSubmit: function(msg){
+          if(msg.nick !== this.state.ownNick){
+            socket.emit("nickChange", msg.nick);
+          }
+          if(msg.text){
+            this.addMessage(msg);
+            socket.emit("chatMessage", msg);
+          }
+        },
+        render: function(){
+          return (
+            <div className="chatBox">
+              <h3>Chat</h3>
+              <ChatLog data={this.state.data} />
+              <ChatMessageForm ownNick={this.state.ownNick}
+              onChatMessageSubmit={this.handleChatMessageSubmit} />
+            </div>
+          )
+        }
+      });
+      var ChatLog = React.createClass({
+        render: function(){
+          var messageNodes = this.props.data.map(msg => {
+            return (
+              <li key={msg.id}>
+                <ChatMessage nick={msg.nick} text={msg.text} type={msg.type} />
+              </li>
+            )
+          });
+          return (
+            <ul>{messageNodes}</ul>
+          )
+        }
+      });
+      var ChatMessage = React.createClass({
+        getPrettyDate: function(){
+          let d = new Date();
+          return [d.getHours(), d.getMinutes(), d.getSeconds()].map(v => ("00" + v).slice(-2)).join(":");
+        },
+        render: function(){
+          return (
+            <span className={"message " + this.props.type}>
+              <span className="timestamp">{this.getPrettyDate()}</span>
+              <span className="nick">{this.props.nick}</span>
+              <span className="text">{this.props.text}</span>
+            </span>
+          )
+        }
+      });
+      var ChatMessageForm = React.createClass({
+        getInitialState: function(){
+          return {nick: "me", text: ""};
+        },
+        componentDidMount: function(){
+          this.setState({nick: this.props.ownNick});
+        },
+        handleNickChange: function(e){
+          this.setState({nick: e.target.value});
+        },
+        handleTextChange: function(e){
+          this.setState({text: e.target.value});
+        },
+        handleSubmit: function(e){
+          e.preventDefault();
+          var nick = this.state.nick.replace(newLineRegex, "").trim();
+          var text = this.state.text;
+          if(!nick){
+            return;
+          }
+          this.props.onChatMessageSubmit({nick, text});
+          this.setState({text: ""});
+        },
+        componentWillReceiveProps(props){
+          if(props.ownNick !== this.state.nick){
+            this.setState({nick : props.ownNick});
+          }
+        },
+        render: function(){
+          return (
+            <form className="chatMessageForm" onSubmit={this.handleSubmit}>
+              <input type="text" placeholder="nickname"
+              value={this.state.nick} onChange={this.handleNickChange} />
+              <input type="text" placeholder="Say something..."
+              value={this.state.text} onChange={this.handleTextChange} />
+              <input type="submit" value="Send" />
+            </form>
+          )
+        }
+      });
+      ReactDOM.render(
+        <div>
+          <PlaylistBox url="/api/myroom/playlist" />
+          <ChatBox />
+        </div>,
+        document.getElementById("content")
+      );
+    </script>
+  </body>
 </html>
