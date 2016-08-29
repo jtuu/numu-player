@@ -29,6 +29,9 @@ socket.on("play", fileName => {
   curPlstIndex = playlist.findIndex(v => v.fileName === fileName);
   playerEl.src = `transcoded/${fileName}.mp3`;
 });
+socket.on("songPosRequest", (data, cb) => {
+  cb(100);
+});
 
 var curPlstIndex = -1;
 const url = `/api/${room}/song`;

@@ -18,7 +18,9 @@ db.saveFileInfo = (room, fileInfo) => {
       orig_filename,
       mimetype,
       bytesize
-    ) values ($1, $2, $3, $4, $5)`, [
+    ) values (
+			$1, $2, $3, $4, $5
+		) returning id`, [
 			room,
 			fileInfo.filename,
 			fileInfo.originalname,
@@ -26,7 +28,7 @@ db.saveFileInfo = (room, fileInfo) => {
 			fileInfo.size
 		], (err, result) => {
 			if (err) return reject(err);
-			resolve(result);
+			resolve(result.rows[0].id);
 		});
 	});
 }
@@ -36,8 +38,17 @@ db.getFilesInRoom = (room) => {
 		pool.query("select * from files where room = $1", [room], (err, result) => {
 			if (err) return reject(err);
 			resolve(result.rows);
-		})
-	})
+		});
+	});
+}
+
+db.deleteFileInfo = (id) => {
+	return new Promise((resolve, reject) => {
+		pool.query("delete from files where id = $1 returning filename", [id], (err, result) => {
+			if (err) return reject(err);
+			resolve(result.rows[0].filename);
+		});
+	});
 }
 
 module.exports = db;
