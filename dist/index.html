@@ -8,8 +8,14 @@
     <script src="https://npmcdn.com/babel-core@5.8.38/browser.min.js"></script>
     <script src="https://npmcdn.com/jquery@3.1.0/dist/jquery.min.js"></script>
     <script src="https://npmcdn.com/remarkable@1.6.2/dist/remarkable.min.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
     <script src="api/ws/socket.io.js"></script>
     <style>
+      body{
+        background: #fafafa;
+        font-family: "Roboto", "Helvetica Neue", sans-serif;
+      }
+
       .message > *{
         margin-right: 5px;
       }
@@ -26,6 +32,66 @@
       .message.chatMessage > .nick:after{
         content:">";
       }
+
+      .chatBox{
+        background: hsl(0, 0%, 90%);
+        width: 600px;
+      }
+
+      .chatBox{
+        display: flex;
+        flex-flow: row wrap;
+      }
+
+      .chatBox > .top{
+        background: hsl(0, 0%, 75%);
+        margin: 0;
+        flex: 1 100%;
+        padding-left: 20px;
+      }
+      .chatBox > .left{
+        background: hsl(0, 0%, 85%);
+        padding-left: 10px;
+        padding-right: 10px;
+        flex: 1;
+      }
+      .chatBox > .right{
+        display: flex;
+        flex-flow: column;
+        justify-content: end;
+        flex: 5;
+        height: 200px;
+      }
+
+      .chatNames > ul{
+        list-style: none;
+        padding-left: 5px;
+      }
+      .chatLog{
+        overflow-y: scroll;
+        max-height: 200px;
+        flex: 100%;
+      }
+      .chatLog ul{
+        padding-left: 0;
+        list-style: none;
+        margin: 0;
+      }
+      .chatLog .text{
+        word-break: break-all;
+      }
+      .chatLog > ul > li:nth-child(even){
+        background: hsla(0, 0%, 50%, 0.1);
+      }
+      .chatLog > ul > li:nth-child(odd){
+        background: hsla(0, 0%, 50%, 0.2);
+      }
+      .chatMessageForm{
+        display: flex;
+      }
+      .chatMessageForm > .messageInput{
+        flex: 100%;
+      }
     </style>
   </head>
   <body>
@@ -35,6 +101,7 @@
         path: "/api/ws/"
       });
       socket.emit("join", "myroom");
+      socket.emit("chatNamesRequest");
     </script>
     <script type="text/babel">
       var PlaylistBox = React.createClass({
@@ -74,15 +141,21 @@
       });
 
       var chatMessageId = 0;
+      var chatUserId = 0;
       var newLineRegex = /(?:\r?\n|\r)+/gm;
       var ChatBox = React.createClass({
         addMessage: function(msg){
           msg.id = chatMessageId++;
-          var newData = this.state.data.concat([msg]);
-          this.setState({data: newData});
+          msg.timestamp = this.getPrettyDate();
+          var newData = this.state.logs.concat([msg]);
+          this.setState({logs: newData});
+
+          if(this.state.logEl){
+            setTimeout(() => this.state.logEl.scrollTop = this.state.logEl.scrollHeight, 0);
+          }
         },
         getInitialState: function(){
-          return {data: [], names: [], ownNick: "me"};
+          return {logs: [], names: [], ownNick: "me", logEl: null};
         },
         componentDidMount: function(){
           socket.on("chatMessage", msg => {
@@ -104,7 +177,7 @@
 
             var index = this.state.names.indexOf(nick);
             if(index > -1){
-              this.state.splice(index, 1);
+              this.state.names.splice(index, 1);
             }
 
             this.setState({names: this.state.names});
@@ -116,7 +189,7 @@
             this.addMessage(msg);
 
             var index = this.state.names.indexOf(nicks.old);
-            if(index){
+            if(index > -1){
               this.state.names[index] = nicks.new;
               this.setState({names: this.state.names});
             }
@@ -125,12 +198,21 @@
               this.setState({ownNick: nicks.new});
             }
           });
+          socket.on("chatNames", names => {
+            this.setState({names});
+          });
+        },
+        getPrettyDate: function(){
+          let d = new Date();
+          return [d.getHours(), d.getMinutes(), d.getSeconds()].map(v => ("00" + v).slice(-2)).join(":");
         },
         handleChatMessageSubmit: function(msg){
           if(msg.nick !== this.state.ownNick){
+            this.setState({ownNick: msg.nick});
             socket.emit("nickChange", msg.nick);
           }
           if(msg.text){
+            msg.type = "chatMessage";
             this.addMessage(msg);
             socket.emit("chatMessage", msg);
           }
@@ -138,11 +220,51 @@
         render: function(){
           return (
             <div className="chatBox">
-              <h3>Chat</h3>
-              <ChatLog data={this.state.data} />
-              <ChatMessageForm ownNick={this.state.ownNick}
-              onChatMessageSubmit={this.handleChatMessageSubmit} />
+              <div className="top">
+                <h3>Chat</h3>
+              </div>
+              <div className="left">
+                <ChatUserList data={this.state.names} />
+              </div>
+              <div className="right">
+                <ChatLog ref={com => {
+                  if(com && !this.state.logEl){
+                    this.setState({
+                      logEl: ReactDOM.findDOMNode(com)
+                    });
+                  }
+                }}
+                data={this.state.logs} />
+                <ChatMessageForm ownNick={this.state.ownNick}
+                onChatMessageSubmit={this.handleChatMessageSubmit} />
+              </div>
             </div>
+          )
+        }
+      });
+      var ChatUserList = React.createClass({
+        render: function(){
+          var nameNodes = this.props.data.map(nick => {
+            return (
+              <li key={chatUserId++}>
+                <ChatUser nick={nick} />
+              </li>
+            )
+          });
+          return (
+            <div className="chatNames">
+              <h4>Users</h4>
+              <ul>{nameNodes}</ul>
+            </div>
+          )
+        }
+      });
+      var ChatUser = React.createClass({
+        render: function(){
+          return (
+            <span className="user">
+              <span className="nick">{this.props.nick}</span>
+            </span>
           )
         }
       });
@@ -151,24 +273,23 @@
           var messageNodes = this.props.data.map(msg => {
             return (
               <li key={msg.id}>
-                <ChatMessage nick={msg.nick} text={msg.text} type={msg.type} />
+                <ChatMessage nick={msg.nick} text={msg.text}
+                type={msg.type} timestamp={msg.timestamp} />
               </li>
             )
           });
           return (
-            <ul>{messageNodes}</ul>
+            <div className="chatLog">
+              <ul>{messageNodes}</ul>
+            </div>
           )
         }
       });
       var ChatMessage = React.createClass({
-        getPrettyDate: function(){
-          let d = new Date();
-          return [d.getHours(), d.getMinutes(), d.getSeconds()].map(v => ("00" + v).slice(-2)).join(":");
-        },
         render: function(){
           return (
             <span className={"message " + this.props.type}>
-              <span className="timestamp">{this.getPrettyDate()}</span>
+              <span className="timestamp">{this.props.timestamp}</span>
               <span className="nick">{this.props.nick}</span>
               <span className="text">{this.props.text}</span>
             </span>
@@ -209,7 +330,8 @@
               <input type="text" placeholder="nickname"
               value={this.state.nick} onChange={this.handleNickChange} />
               <input type="text" placeholder="Say something..."
-              value={this.state.text} onChange={this.handleTextChange} />
+              value={this.state.text} onChange={this.handleTextChange}
+              className="messageInput" />
               <input type="submit" value="Send" />
             </form>
           )

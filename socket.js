@@ -15,11 +15,16 @@ function changeRoom(socket, newRoomName) {
 	socket.currentRoom = newRoomName;
 }
 
+function log(msg){
+	let d = new Date();
+	console.log(`[${d.toJSON()}] ${msg}`);
+}
+
 function logSock(socket, msg, ...rest) {
 	if (!(rest.length && rest[0] instanceof Error)) {
 		rest = JSON.stringify(rest);
 	}
-	console.log(`[${socket.nickname}]: ${msg} ${rest}`);
+	log(`[${socket.nickname}]: ${msg} ${rest}`);
 }
 
 function getCurrentSong(ns, roomName) {
@@ -60,7 +65,7 @@ module.exports = function setup(app) {
 		});
 
 		socket.on("nickChange", nick => {
-			socket.broadcast.to(socket.currentRoom).emit("nickChange", {
+			publicNS.in(socket.currentRoom).emit("nickChange", {
 				old: socket.nickname,
 				new: nick
 			});
@@ -73,6 +78,15 @@ module.exports = function setup(app) {
 			getCurrentSongPos(publicNS, socket.currentRoom).then(song => {
 				socket.emit("currentSong", song);
 			}).catch(err => socket.emit("error", err));
+		});
+
+		socket.on("chatNamesRequest", () => {
+			logSock(socket, "requested chat names");
+			socket.emit("chatNames", Object.keys(publicNS.sockets).filter(
+				s => s.room === socket.room
+			).map(
+				s => publicNS.sockets[s].nickname
+			));
 		});
 
 		["play", "pause", "chatMessage", "seek"].forEach(eventName => {
