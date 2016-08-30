@@ -38,5 +38,6 @@ jspm_packages
 
 
 # custom
+config
 uploads
 dist/transcoded

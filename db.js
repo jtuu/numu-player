@@ -1,12 +1,5 @@
 const pg = require("pg");
-const config = {
-	user: "admin",
-	database: "numu-player",
-	password: "password",
-	port: 5432,
-	max: 10,
-	idleTimeoutMillis: 30000
-};
+const config = require("./config/db-config.json");
 const pool = new pg.Pool(config);
 const db = {};
 
