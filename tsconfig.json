@@ -1,0 +1,50 @@
+{
+    "compilerOptions": {
+        "outDir": "./dist/",
+        "sourceMap": true,
+        "noImplicitAny": false,
+        "module": "commonjs",
+        "target": "es6",
+        "jsx": "react"
+    },
+    "filesGlob": [
+        "typings/index.d.ts",
+        "client/index.d.ts",
+        "client/*.tsx",
+        "client/**/*.tsx",
+        "client/*.scss",
+        "client/**/*.scss",
+        "node_modules/redux/index.d.ts",
+        "common/**/*"
+    ],
+    "files": [
+        "typings/index.d.ts",
+        "client/index.d.ts",
+        "client/index.tsx",
+        "client/routes.tsx",
+        "client/socket.tsx",
+        "client/store.tsx",
+        "client/actions/index.tsx",
+        "client/components/app/index.tsx",
+        "client/components/chat-box/index.tsx",
+        "client/components/chat-log/index.tsx",
+        "client/components/chat-message/index.tsx",
+        "client/components/chat-user-list/index.tsx",
+        "client/components/chat-user/index.tsx",
+        "client/components/home/index.tsx",
+        "client/components/nav-link/index.tsx",
+        "client/containers/app/index.tsx",
+        "client/containers/chat/index.tsx",
+        "client/containers/join-room/index.tsx",
+        "client/containers/room/index.tsx",
+        "client/containers/root/index.tsx",
+        "client/containers/send-chat-message/index.tsx",
+        "client/reducers/index.tsx",
+        "client/styles.css",
+        "node_modules/redux/index.d.ts",
+        "common/constants.json"
+    ],
+    "atom": {
+        "rewriteTsconfig": true
+    }
+}

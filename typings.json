@@ -1,0 +1,13 @@
+{
+  "globalDependencies": {
+    "react": "registry:dt/react#0.14.0+20160817201227",
+    "react-css-modules": "registry:dt/react-css-modules#3.7.9+20160805170511",
+    "react-dom": "registry:dt/react-dom#0.14.0+20160412154040",
+    "react-redux": "registry:dt/react-redux#4.4.0+20160724070751",
+    "react-router": "registry:dt/react-router#2.0.0+20160828232736",
+    "react-router/history": "registry:dt/react-router/history#2.0.0+20160830150755",
+    "redux": "registry:dt/redux#3.5.2+20160703092728",
+    "socket.io-client": "registry:dt/socket.io-client#1.4.4+20160317120654"
+  },
+  "dependencies": {}
+}

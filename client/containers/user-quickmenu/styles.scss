@@ -1,0 +1,26 @@
+$name-label-size: 0.7em;
+
+.cont{
+  height: 100%;
+  width: 4.5em;
+  display: block;
+
+  .avatar{
+    background-image: url(http://i.imgur.com/PAcnjLm.png);
+    background-size: cover;
+    border-radius: 50%;
+    width: calc(100% - #{$name-label-size});
+    height: calc(100% - #{$name-label-size});
+    margin: auto;
+  }
+
+  .name{
+    width: 100%;
+    text-align: center;
+    background: white;
+    color: black;
+    font-size: $name-label-size;
+    line-height: 1em;
+    margin: auto;
+  }
+}

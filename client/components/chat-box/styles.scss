@@ -1,0 +1,21 @@
+.chatbox{
+  background: hsl(270, 50%, 90%);
+  max-width: 100%;
+  width: 600px;
+  .topcont{
+    > * {
+      display: inline-block;
+    }
+    .chatlog{
+      width: 80%;
+    }
+    .userlist{
+      width: 20%;
+      background-color: hsla(0, 0%, 10%, 0.1);
+    }
+  }
+
+  .sendmessage{
+
+  }
+}

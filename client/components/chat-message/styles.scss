@@ -1,0 +1,40 @@
+.message{
+  &:nth-child(odd){
+    background: hsla(0, 0%, 60%, 0.1);
+  }
+
+  &:nth-child(even){
+    background: hsla(0, 0%, 70%, 0.1);
+  }
+
+  > * + *{
+    margin-left: 5px;
+  }
+
+  .timestamp{
+    color: hsl(0, 0%, 20%);
+
+    &:before{
+      content:"[";
+    }
+    &:after{
+      content:"]";
+    }
+  }
+
+  .nick{
+    color: hsl(270, 30%, 40%);
+    &:after{
+      content:":";
+    }
+  }
+
+  .text{
+    word-wrap: break-word;
+    color: hsl(0, 0%, 30%);
+  }
+
+  .nick + .text{
+    color: black;
+  }
+}
