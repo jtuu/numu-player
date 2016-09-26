@@ -125,3 +125,9 @@ export const seekSong = (seconds: number) => {
     seconds
   };
 };
+
+export const unsetSeek = () => {
+  return {
+    type: ACTION_TYPE.UNSET_SEEK
+  };
+}

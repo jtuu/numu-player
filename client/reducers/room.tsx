@@ -33,7 +33,8 @@ const room = (state = initialStates.room, action) => {
     case ACTION_TYPE.RESUME_PLAYER:
     case ACTION_TYPE.STOP_PLAYER:
     case ACTION_TYPE.RESET_PLAYER:
-    case ACTION_TYPE.SEEK_SONG: {
+    case ACTION_TYPE.SEEK_SONG:
+    case ACTION_TYPE.UNSET_SEEK: {
 			return Object.assign({}, state, {player: player(state.player, action)});
 		}
     default: {

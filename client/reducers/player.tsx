@@ -109,6 +109,11 @@ const player = (state: PlayerState = initialStates.player, action) => {
 				seekTo: action.seconds
 			});
 		}
+		case ACTION_TYPE.UNSET_SEEK: {
+			const newState = Object.assign({}, state);
+			delete newState.seekTo;
+			return newState;
+		}
 		case ACTION_TYPE.SONG_UPLOAD_BEGIN:
 		case ACTION_TYPE.SONG_TRANSCODE_BEGIN:
 		case ACTION_TYPE.SONG_UPLOAD_END:

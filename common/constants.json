@@ -27,6 +27,7 @@
     "STOP_PLAYER": "STOP_PLAYER",
     "RESET_PLAYER": "RESET_PLAYER",
     "SEEK_SONG": "SEEK_SONG",
+    "UNSET_SEEK": "UNSET_SEEK",
 
     "NOOP": "NOOP"
   },

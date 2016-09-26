@@ -11,7 +11,8 @@ import {
   resumePlayer,
   stopPlayer,
   resetPlayer,
-  seekSong
+  seekSong,
+  unsetSeek
 } from "../../actions";
 const styles = require("./styles.scss");
 
@@ -22,6 +23,7 @@ interface PlayerProps{
   onPause?: Function;
   onResume?: Function;
   onSeek?: Function;
+  unsetSeek?: Function;
   ownNick?: string;
   roomName?: string;
   songs?: {};
@@ -95,7 +97,8 @@ const mergeProps = (stateProps: PlayerProps, {dispatch}): PlayerProps => {
     },
     onSeek: (seconds: number) => {
       dispatch(seekSong(seconds));
-    }
+    },
+    unsetSeek: () => dispatch(unsetSeek())
   });
 }
 
@@ -173,8 +176,8 @@ class Player extends React.Component<PlayerProps, {currentTime: number}>{
 
   componentWillReceiveProps(nextProps: PlayerProps){
     if(nextProps.seekTo !== this.props.seekTo){
-      console.log(nextProps.seekTo)
       this.seek(nextProps.seekTo);
+      this.props.unsetSeek();
     }
     if(
       nextProps.status !== this.props.status ||

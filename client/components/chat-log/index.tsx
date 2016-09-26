@@ -13,21 +13,24 @@ class ChatLog extends React.Component<ChatLogProps, {}>{
 
   refs: {
     [key: string]: (Element);
-    log: (HTMLUListElement);
+    container: (HTMLDivElement);
+    log: (HTMLDivElement);
   }
 
   componentDidUpdate(){
-    this.refs.log.scrollTop = this.refs.log.offsetHeight;
+    this.refs.container.scrollTop = this.refs.log.offsetHeight;
   }
 
   render(){
     return (
-      <div className={styles.chatlog} ref="log">
-        {
-          this.props.messages.map(msg => (
-            <ChatMessage key={msg.id} {...msg} />
-          ))
-        }
+      <div ref="container" className={styles.container}>
+        <div className={styles.chatlog} ref="log">
+          {
+            this.props.messages.map(msg => (
+              <ChatMessage key={msg.id} {...msg} />
+            ))
+          }
+        </div>
       </div>
     );
   }
