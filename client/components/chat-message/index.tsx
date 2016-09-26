@@ -17,11 +17,11 @@ const ChatMessage = ({nick, text, timestamp}: ChatMessageProps) => {
   const nickEl = nick ? (<span className={styles.nick}>{nick}</span>) : null;
 
   return (
-    <li className={styles.message}>
+    <div className={styles.message}>
       <span className={styles.timestamp}>{prettyDate(timestamp)}</span>
       {nickEl}
       <span className={styles.text}>{text}</span>
-    </li>
+    </div>
   );
 };
 

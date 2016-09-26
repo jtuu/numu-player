@@ -1,5 +1,6 @@
 {
   "globalDependencies": {
+    "dragula": "registry:dt/dragula#2.1.2+20160317120654",
     "react": "registry:dt/react#0.14.0+20160817201227",
     "react-css-modules": "registry:dt/react-css-modules#3.7.9+20160805170511",
     "react-dom": "registry:dt/react-dom#0.14.0+20160412154040",

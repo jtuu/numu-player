@@ -1,0 +1,122 @@
+.song {
+    white-space: nowrap;
+    display: flex;
+    padding: 2px;
+    margin: 2px;
+    background: hsla(250, 50%, 80%, 0.3);
+
+    &.playing {
+        background: hsla(250, 50%, 80%, 0.8);
+    }
+
+    .left {
+        flex: 6;
+        overflow-x: auto;
+
+        .row {
+            display: flex;
+
+            > *:empty:after {
+                content: "(unknown)";
+                color: hsl(0, 0%, 20%);
+            }
+
+            &.top {
+                font-size: 1.1em;
+            }
+
+            .artist,
+            .title {
+                color: hsl(0, 0%, 10%);
+                font-weight: 500;
+            }
+
+            .delim {
+                &:after {
+                    content: "-";
+                }
+            }
+
+            .duration {
+                font-size: 70%;
+                font-weight: 300;
+                align-self: center;
+
+                &:before {
+                    content: "(";
+                }
+
+                &:after {
+                    content: ")";
+                }
+            }
+
+            .artist,
+            .delim,
+            .title {
+                margin-right: 10px;
+            }
+
+            .uploader {
+                font-size: 0.8em;
+                font-weight: 300;
+            }
+
+            &.bottom {
+                font-size: 0.7em;
+                text-transform: uppercase;
+
+                .status {
+                    margin-right: 5px;
+                }
+
+                .progress {
+                    &:before {
+                        content: "(";
+                    }
+
+                    &:after {
+                        content: "%)";
+                    }
+                }
+            }
+        }
+    }
+
+    .right {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: end;
+
+        .controls {
+            display: flex;
+
+            > * {
+                font-size: 1.5em;
+                line-height: 1.5em;
+                width: 1.5em;
+                text-align: center;
+                color: #fafafa;
+                cursor: pointer;
+                margin-right: 5px;
+
+                &:hover {
+                    background: hsla(0, 0%, 0%, 0.1);
+                }
+            }
+
+            .play {
+                &:after {
+                    content: "▶";
+                }
+            }
+
+            .drag {
+                &:after {
+                    content: "☰";
+                }
+            }
+        }
+    }
+}

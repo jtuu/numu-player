@@ -1,0 +1,55 @@
+.controls {
+	display: flex;
+	background: hsl(180, 40%, 70%);
+	align-items: center;
+	height: 30px;
+	> * {
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	.main_button {
+		cursor: pointer;
+		background: hsla(0, 0%, 0%, 0.2);
+		width: 30px;
+		&:hover{
+			background: hsla(0, 0%, 0%, 0.3);
+		}
+		.icon {
+			color: white;
+			line-height: 30px;
+			font-size: 20px;
+			&.play:after {
+				content: "\f04b";
+			}
+			&.pause:after {
+				content: "\f04c";
+			}
+		}
+	}
+	.seekbar_container {
+		flex: 10;
+		.seekbar {
+			width: 100%;
+		}
+	}
+	.time_container {
+		.time {
+			&:empty:after {
+				content: "00:00";
+			}
+		}
+	}
+	.volumebar_container {
+		padding-left: 10px;
+		margin-left: 10px;
+		flex: 1;
+		background: hsla(0, 0%, 0%, 0.1);
+		.icon {
+			&:after {
+				content: "\f028";
+			}
+		}
+	}
+}

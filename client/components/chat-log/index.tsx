@@ -22,13 +22,13 @@ class ChatLog extends React.Component<ChatLogProps, {}>{
 
   render(){
     return (
-      <ul className={styles.chatlog} ref="log">
+      <div className={styles.chatlog} ref="log">
         {
           this.props.messages.map(msg => (
             <ChatMessage key={msg.id} {...msg} />
           ))
         }
-      </ul>
+      </div>
     );
   }
 }

@@ -42,3 +42,5 @@ config
 uploads
 dist/transcoded
 typings
+dist/bundle.js
+dist/bundle.js.map

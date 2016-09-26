@@ -10,6 +10,19 @@ const chalkColors = [
 	//"white",
 	//"gray"
 ];
+const STRINGS = {
+	TAG_WS: chalk.magenta("WS"),
+	TAG_HTTP: chalk.magenta("HTTP"),
+	TAG_FFMPEG: chalk.magenta("FFMPEG"),
+	JOINED: chalk.green("joined"),
+	LEFT: chalk.yellow("left"),
+	DISCONNECTED: chalk.red("disconnected"),
+	ERROR: chalk.red("error"),
+	STARTED: chalk.cyan("started"),
+	SUCCEEDED: chalk.green("succeeded"),
+	FAILED: chalk.red("failed")
+};
+
 
 function getColor(n){
   return chalkColors[n % chalkColors.length];
@@ -41,7 +54,7 @@ function logWs(socket, msg, ...rest) {
 	const nick = socket.nick || "noname";
 	const address = socket.conn.remoteAddress;
 	const pad = Math.max(logPadmax - nick.length - address.length, 0);
-	log(`[${chalk.magenta("WS")}][${chalk.bold(colorize(nick))}/${colorize(address)}] ${" ".repeat(pad)}${chalk.bold(msg)} ${rest}`);
+	log(`[${STRINGS.TAG_WS}][${chalk.bold(colorize(nick))}/${colorize(address)}] ${" ".repeat(pad)}${chalk.bold(msg)} ${rest}`);
 }
 
 function logHttp(req, res, msg, ...rest){
@@ -50,7 +63,16 @@ function logHttp(req, res, msg, ...rest){
 	}
   const address = req.connection.remoteAddress;
   const pad = Math.max(logPadmax - 1 - address.length, 0);
-  log(`[${chalk.magenta("HTTP")}][${chalk.bold(address)}] ${" ".repeat(pad)}${chalk.bold(msg)} ${rest}`)
+  log(`[${STRINGS.TAG_HTTP}][${chalk.bold(address)}] ${" ".repeat(pad)}${chalk.bold(msg)} ${rest}`)
+}
+
+function logFfmpeg(fileInfo, msg, ...rest){
+	if (!(rest.length && rest[0] instanceof Error)) {
+		rest = JSON.stringify(rest);
+	}
+	const {filename} = fileInfo;
+	const pad = Math.max(logPadmax - 1 - filename.length, 0);
+	log(`[${STRINGS.TAG_FFMPEG}][${chalk.bold(filename)}] ${" ".repeat(pad)}${chalk.bold(msg)} ${rest}`);
 }
 
 function getAllPropertyNames(obj) {
@@ -61,6 +83,16 @@ function getAllPropertyNames(obj) {
   return props;
 }
 
+function transformObjKeys(obj, transform){
+	const keys = Object.keys(obj), newObj = {};
+	var key, n = keys.length;
+	while(n--){
+		key = keys[n];
+		newObj[transform.call(key)] = obj[key];
+	}
+	return newObj;
+}
+
 module.exports = {
   chalkColors,
   colorize,
@@ -69,5 +101,8 @@ module.exports = {
   logWs,
   logHttp,
 	randomNick,
-	getAllPropertyNames
+	getAllPropertyNames,
+	logFfmpeg,
+	transformObjKeys,
+	STRINGS
 }

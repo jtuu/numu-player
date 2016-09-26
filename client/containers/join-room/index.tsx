@@ -33,7 +33,7 @@ class JoinRoom extends React.Component<JoinRoomProps, {}>{
 
   handleSubmit = event => {
     event.preventDefault();
-    let room = this.inputVal.trim();
+    let room = encodeURIComponent(this.inputVal.trim());
     if (!room){
       return;
     }

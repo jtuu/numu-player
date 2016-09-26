@@ -5,19 +5,21 @@
     <meta charset="utf-8">
     <base href="/">
     <title>Numu-player</title>
-    <script src="https://npmcdn.com/react@15.3.1/dist/react.js"></script>
-    <script src="https://npmcdn.com/react-dom@15.3.1/dist/react-dom.js"></script>
-    <script src="https://npmcdn.com/babel-core@5.8.38/browser.min.js"></script>
-    <script src="https://npmcdn.com/jquery@3.1.0/dist/jquery.min.js"></script>
-    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <script src="https://unpkg.com/react@15.3.1/dist/react.js"></script>
+    <script src="https://unpkg.com/react-dom@15.3.1/dist/react-dom.js"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700" rel="stylesheet">
     <script src="api/ws/socket.io.js"></script>
-
     <style>
       body{
         background: #fafafa;
         font-family: "Roboto", sans-serif;
         margin: 0;
         padding: 0;
+      }
+      ul:empty:after{
+        content: "(empty)";
+        color: hsl(0, 0%, 50%);
       }
     </style>
   </head>
